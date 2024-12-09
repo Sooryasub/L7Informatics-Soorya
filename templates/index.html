@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Cream Parlor</title>
+</head>
+<body>
+    <h1>Welcome to the Ice Cream Parlor</h1>
+
+    <h2>Filter and Search</h2>
+    <form method="GET" action="/">
+        <input type="text" name="search" placeholder="Search flavors" value="{{ request.args.get('search', '') }}">
+        <button type="submit">Search</button>
+        <br>
+        <label for="seasonal">Seasonal Flavors Only:</label>
+        <input type="checkbox" name="seasonal" {{ 'checked' if request.args.get('seasonal') == '1' else '' }}>
+        <button type="submit">Filter</button>
+    </form>
+
+    <h2>Flavors</h2>
+    <ul>
+        {% for flavor in flavors %}
+        <li>
+            <strong>{{ flavor[1] }}</strong> - {% if flavor[2] == 1 %}Seasonal{% else %}Regular{% endif %}
+            <ul>
+                {% for allergen in flavor_allergens[flavor[0]] %}
+                <li>{{ allergen }}</li>
+                {% endfor %}
+            </ul>
+            <a href="{{ url_for('add_to_cart', flavor_id=flavor[0]) }}">Add to Cart</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Cart</h2>
+    <ul>
+        {% for item in cart %}
+        <li>{{ item[0] }} - <a href="{{ url_for('remove_from_cart', flavor_id=item[0]) }}">Remove</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Suggest a Flavor</h2>
+    <form method="POST" action="{{ url_for('suggest_flavor') }}">
+        <input type="text" name="flavor_name" placeholder="New flavor name" required>
+        <label for="seasonal">Seasonal:</label>
+        <input type="checkbox" name="seasonal">
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Ingredient Inventory</h2>
+    <ul>
+        {% for ingredient in inventory %}
+        <li>{{ ingredient[1] }} - Quantity: {{ ingredient[2] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

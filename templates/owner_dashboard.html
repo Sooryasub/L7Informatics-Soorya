@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard</title>
+</head>
+<body>
+    <h1>Owner Dashboard</h1>
+    <h2>Manage Flavors</h2>
+    <form action="{{ url_for('owner_dashboard') }}" method="post">
+        <label for="flavor_name">Flavor Name:</label>
+        <input type="text" name="flavor_name" required>
+        <label for="seasonal">Seasonal:</label>
+        <input type="checkbox" name="seasonal">
+        <button type="submit" name="add_flavor">Add Flavor</button>
+    </form>
+    <h3>Existing Flavors</h3>
+    <table border="1">
+        <tr>
+            <th>Flavor</th>
+            <th>Seasonal</th>
+            <th>Action</th>
+        </tr>
+        {% for flavor in flavors %}
+        <tr>
+            <td>{{ flavor[1] }}</td>
+            <td>{{ 'Seasonal' if flavor[2] == 1 else 'Non-Seasonal' }}</td>
+            <td>
+                <form action="{{ url_for('owner_dashboard') }}" method="post">
+                    <input type="hidden" name="flavor_id" value="{{ flavor[0] }}">
+                    <button type="submit" name="remove_flavor">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

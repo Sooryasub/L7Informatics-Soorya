@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Available Flavors</h1>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Flavor</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Actions</th>
+        </tr>
+        {% for flavor in flavors %}
+        <tr>
+            <td>{{ flavor[1] }}</td> <!-- Flavor name -->
+            <td>${{ flavor[2] }}</td> <!-- Flavor price -->
+            <td>
+                <!-- Add Quantity -->
+                <form action="{{ url_for('add_to_cart') }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="flavor_id" value="{{ flavor[0] }}">
+                    <input type="number" name="quantity" value="1" min="1">
+                    <button type="submit">Add to Cart</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Link to View Cart -->
+    <a href="{{ url_for('view_cart') }}">Go to Cart</a>
+</body>
+</html>

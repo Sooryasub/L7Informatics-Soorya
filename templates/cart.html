@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+</head>
+<body>
+    <h1>Your Cart</h1>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Flavor</th>
+            <th>Quantity</th>
+            <th>Actions</th>
+        </tr>
+        {% if cart_items %}
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item[1] }}</td> <!-- Flavor name -->
+                <td>{{ item[2] }}</td> <!-- Quantity -->
+                <td>
+                    <!-- Update Quantity Form -->
+                    <form action="{{ url_for('update_cart', cart_id=item[0]) }}" method="POST" style="display:inline;">
+                        <input type="number" name="quantity" value="{{ item[2] }}" min="0">
+                        <button type="submit">Update</button>
+                    </form>
+                    <!-- Remove Item -->
+                    <a href="{{ url_for('remove_from_cart', cart_id=item[0]) }}">Remove</a>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="3">Your cart is empty.</td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <!-- Place Order Button -->
+    {% if cart_items %}
+        <form action="{{ url_for('place_order') }}" method="POST">
+            <button type="submit">Place Order</button>
+        </form>
+    {% endif %}
+</body>
+</html>
