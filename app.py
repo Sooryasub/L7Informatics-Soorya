@@ -224,6 +224,7 @@ def owner_inventory():
 
     return render_template('owner_inventory.html', flavors=flavors)
 
+
 @app.route('/cart')
 def view_cart():
     conn = sqlite3.connect(DB_NAME)
@@ -244,68 +245,46 @@ def view_cart():
     cart_items = c.fetchall()
     conn.close()
 
-    # Debugging to ensure cart items are fetched
-    print("Cart items:", cart_items)
-
     return render_template('cart.html', cart_items=cart_items)
-
-
-
 
 @app.route('/add_to_cart/<int:flavor_id>', methods=['POST'])
 def add_to_cart(flavor_id):
-    quantity = request.form.get('quantity', 0)  # Default to 0 if no quantity provided
-    if not quantity.isdigit():
-        quantity = 0  # Handle invalid input gracefully
+    quantity = int(request.form['quantity'])
+    user_id = 1  # Assuming a default user ID of 1 for simplicity
 
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    # Check if the flavor is already in the cart
-    c.execute("SELECT id FROM cart WHERE flavor_id = ?", (flavor_id,))
+    # Check if the item is already in the cart
+    c.execute('SELECT * FROM cart WHERE flavor_id = ? AND user_id = ?', (flavor_id, user_id))
     existing_item = c.fetchone()
 
     if existing_item:
-        # Update the existing quantity
-        c.execute("UPDATE cart SET quantity = quantity + ? WHERE flavor_id = ?", (int(quantity), flavor_id))
+        # If the item exists, update the quantity
+        new_quantity = existing_item[3] + quantity
+        c.execute('UPDATE cart SET quantity = ? WHERE flavor_id = ? AND user_id = ?',
+                  (new_quantity, flavor_id, user_id))
     else:
-        # Insert new item into cart
-        c.execute("INSERT INTO cart (flavor_id, quantity) VALUES (?, ?)", (flavor_id, quantity))
+        # If the item doesn't exist, insert it into the cart
+        c.execute('INSERT INTO cart (flavor_id, user_id, quantity) VALUES (?, ?, ?)',
+                  (flavor_id, user_id, quantity))
 
     conn.commit()
     conn.close()
+
     return redirect(url_for('view_cart'))
-
-
-
-@app.route('/update_cart/<int:cart_id>', methods=['POST'])
-def update_cart(cart_id):
-    new_quantity = request.form.get('quantity', 0)
-
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-
-    if int(new_quantity) > 0:
-        # Update the quantity
-        c.execute("UPDATE cart SET quantity = ? WHERE id = ?", (new_quantity, cart_id))
-    else:
-        # Remove the item if quantity is 0
-        c.execute("DELETE FROM cart WHERE id = ?", (cart_id,))
-
-    conn.commit()
-    conn.close()
-    return redirect(url_for('view_cart'))
-
 
 @app.route('/remove_from_cart/<int:cart_id>')
 def remove_from_cart(cart_id):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute("DELETE FROM cart WHERE id = ?", (cart_id,))
+
+    # Remove item from cart by ID
+    c.execute('DELETE FROM cart WHERE id = ?', (cart_id,))
     conn.commit()
     conn.close()
-    return redirect(url_for('view_cart'))
 
+    return redirect(url_for('view_cart'))
 
 @app.route('/customer/dashboard')
 def customer_dashboard():
